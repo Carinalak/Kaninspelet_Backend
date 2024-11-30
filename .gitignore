@@ -1,0 +1,20 @@
+# Node.js dependencies
+node_modules/
+
+# TypeScript build output
+dist/
+
+# Log files
+*.log
+
+# Environment files (make sure not to commit sensitive data!)
+.env
+
+# OS-specific files
+.DS_Store
+
+# Editor files (e.g. VS Code settings)
+.vscode/
+
+# npm package lock file (only if you don't want to track it)
+# package-lock.json
