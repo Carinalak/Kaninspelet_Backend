@@ -24,7 +24,6 @@ app.use(cors());
 
 /** USERS ROUTES */
 
-// Funktion för att hämta användare från Supabase
 const getUsersFromSupabase = async (): Promise<any> => {
   const { data, error } = await supabase.from('users').select('*');
   if (error) throw new Error(error.message);
@@ -81,7 +80,7 @@ app.post('/game_results', async (req: Request, res: Response) => {
     {
       user_id: user_id,
       score: score,
-      game_time: game_time, // Förväntar sig att detta är i rätt format för databasen
+      game_time: game_time,
     },
   ]);
 
@@ -103,7 +102,7 @@ app.get('/game_results', async (req: Request, res: Response) => {
   }
 });
 
-/** STARTA SERVERN */
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
