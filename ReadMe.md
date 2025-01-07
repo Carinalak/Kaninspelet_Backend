@@ -1,5 +1,13 @@
 # RabbitGame Backend
 
-To run the project:
-
+To run the backend:
 - backend: npm run dev
+
+------------------------------------------
+- Backend is deployed on Railway.com
+-The database is on Supabase.com-
+
+# Installationer:
+
+- npm list express @supabase/supabase-js body-parser cors
+
