@@ -7,7 +7,8 @@
     "esModuleInterop": true,                             /* Aktivera import av CommonJS-moduler. */
     "forceConsistentCasingInFileNames": true,            /* Tvinga konsekvent filnamnsstorlek i importerna. */
     "strict": true,                                      /* Aktivera striktare typkontroller. */
-    "skipLibCheck": true                                 /* Hoppa över typkontroll för .d.ts-filer. */
+    "skipLibCheck": true,                                 /* Hoppa över typkontroll för .d.ts-filer. */
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"],                               /* Inkludera alla TypeScript-filer i src/ för kompilering. */
   "exclude": ["node_modules"]                            /* Exkludera node_modules från kompileringen. */

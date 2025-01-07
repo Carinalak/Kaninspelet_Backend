@@ -10,4 +10,6 @@ To run the backend:
 # Installationer:
 
 - npm list express @supabase/supabase-js body-parser cors
+- npm install express @types/express
+
 

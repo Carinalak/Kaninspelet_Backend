@@ -1,67 +1,109 @@
 import express, { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import cors from 'cors';
+
+dotenv.config();
 
 // Kontrollera att miljövariablerna är definierade
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
-  throw new Error('Supabase URL or Supabase Key is not defined in .env file');
+  console.error('Supabase URL or Supabase Key is not defined in .env file');
+  process.exit(1);
 }
-
-// Ladda miljövariabler från .env-filen
-dotenv.config();
 
 const app = express();
 const port = 3000;
 
-// Middleware för att tolka JSON
-app.use(express.json()); 
-
-// Definiera typ för användare
-interface User {
-  name: string;
-  password: string;
-}
-
-// Konfigurera Supabase-klienten
 const supabase = createClient(
-  process.env.SUPABASE_URL!,  // Supabase URL från miljövariabler
-  process.env.SUPABASE_KEY!   // Supabase API-nyckel från miljövariabler
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_KEY!
 );
 
-// Skapa en användare
-app.post('/users', async (req: Request, res: Response) => {
-  const { name, password }: User = req.body;  // Använd User-typen för att definiera req.body
+app.use(express.json());
+app.use(cors());
 
-  if (!name || !password) {
-    return res.status(400).json({ error: 'Name and password are required' });
-  }
+/** USERS ROUTES */
 
+// Funktion för att hämta användare från Supabase
+const getUsersFromSupabase = async (): Promise<any> => {
+  const { data, error } = await supabase.from('users').select('*');
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+// Hämta alla användare
+app.get('/users', async (req: Request, res: Response) => {
   try {
-    // Skapa användaren i Supabase
-    const { data, error } = await supabase
-      .from('users')
-      .insert([{ name, password }])
-      .single();  // Returnera endast en användare
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    // Returnera den skapade användaren
-    res.status(201).json({
-      message: 'User created successfully',
-      data: {
-        name: data.name,
-        password: data.password,  // VARNING: att returnera lösenord är osäkert i verkliga produktion
-      },
-    });
+    const users = await getUsersFromSupabase();
+    res.json(users);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error creating user' });
+    res.status(500).json({ error: 'Failed to fetch users from Supabase' });
   }
 });
 
-// Starta servern
+// Skapa en ny användare
+app.post('/users', async (req: Request, res: Response) => {
+  const { name, password } = req.body;
+
+  const { data, error } = await supabase.from('users').insert([
+    { name: name, password: password }
+  ]);
+
+  if (error) {
+    res.status(500).json({ error: error.message });
+  } else {
+    res.status(201).json({ message: 'User created successfully', data });
+  }
+});
+
+/** GAME RESULTS ROUTES */
+
+
+
+// Hämta alla game results
+app.get('/game_results', async (req: Request, res: Response) => {
+  try {
+    const { data, error } = await supabase.from('game_results').select('*'); // Korrekt tabellnamn
+    if (error) {
+      throw new Error(error.message);
+    }
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch game results from Supabase' });
+  }
+});
+
+// Funktion för att lägga till ett spelresultat
+app.post('/game_results', async (req: Request, res: Response) => {
+  const { user_id, score, game_time } = req.body;
+
+  const { data, error } = await supabase.from('game_results').insert([
+    {
+      user_id: user_id,
+      score: score,
+      game_time: game_time, // Förväntar sig att detta är i rätt format för databasen
+    },
+  ]);
+
+  if (error) {
+    res.status(500).json({ error: error.message });
+  } else {
+    res.status(201).json({ message: 'Game result saved successfully', data });
+  }
+});
+
+// Hämta alla spelresultat
+app.get('/game_results', async (req: Request, res: Response) => {
+  const { data, error } = await supabase.from('game_results').select('*');
+
+  if (error) {
+    res.status(500).json({ error: error.message });
+  } else {
+    res.json(data);
+  }
+});
+
+/** STARTA SERVERN */
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
