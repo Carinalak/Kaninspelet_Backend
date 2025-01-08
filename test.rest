@@ -1,9 +1,21 @@
-POST http://localhost:3000/users
+# @name CreateUser
+POST http://localhost:3000/users/register
 Content-Type: application/json
 
 {
-  "name": "Bella",
+  "name": "Hajen",
   "password": "test"
+}
+
+###
+
+# @name LoginUser
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+"name": "Bobo",
+"password": "test"
 }
 
 ###
@@ -13,6 +25,7 @@ GET http://localhost:3000/users
 
 ###
 
+# @name postGame_results
 POST http://localhost:3000/game_results
 Content-Type: application/json
 

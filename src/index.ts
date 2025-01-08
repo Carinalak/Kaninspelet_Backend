@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import bcrypt from 'bcrypt';
 
 dotenv.config();
 
@@ -24,45 +25,79 @@ app.use(cors());
 
 /** USERS ROUTES */
 
-const getUsersFromSupabase = async (): Promise<any> => {
-  const { data, error } = await supabase.from('users').select('*');
-  if (error) throw new Error(error.message);
-  return data;
-};
-
 // Hämta alla användare
 app.get('/users', async (req: Request, res: Response) => {
   try {
-    const users = await getUsersFromSupabase();
-    res.json(users);
+    const { data, error } = await supabase.from('users').select('*');
+    if (error) throw new Error(error.message);
+    res.json(data);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch users from Supabase' });
   }
 });
 
-// Skapa en ny användare
-app.post('/users', async (req: Request, res: Response) => {
+// Skapa användare
+app.post('/users/register', async (req: Request, res: Response) => {
   const { name, password } = req.body;
 
-  const { data, error } = await supabase.from('users').insert([
-    { name: name, password: password }
-  ]);
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const { data, error } = await supabase.from('users').insert([
+      { name, password: hashedPassword },
+    ]);
 
-  if (error) {
-    res.status(500).json({ error: error.message });
-  } else {
-    res.status(201).json({ message: 'User created successfully', data });
+    if (error) {
+      res.status(500).json({ error: error.message });
+      return;
+    }
+
+    res.status(201).json({ message: 'Användare registrerad!', data });
+  } catch (err) {
+    res.status(500).json({ error: 'Kunde inte registrera användaren.' });
   }
 });
 
+
+
+// Logga in användare
+app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
+  const { name, password } = req.body;
+
+  try {
+    // Hämta användaren från databasen baserat på namnet
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('name', name)
+      .single();
+
+    if (error || !data) {
+      res.status(401).json({ error: 'Fel användarnamn eller lösenord.' });
+      return; // Avsluta funktionen
+    }
+
+    // Verifiera lösenordet med bcrypt
+    const isPasswordValid = await bcrypt.compare(password, data.password);
+
+    if (!isPasswordValid) {
+      res.status(401).json({ error: 'Fel användarnamn eller lösenord.' });
+      return;
+    }
+
+    // Inloggning lyckades
+    res.status(200).json({ message: 'Inloggning lyckades', user: { id: data.id, name: data.name } });
+  } catch (err) {
+    res.status(500).json({ error: 'Serverfel vid inloggning.' });
+  }
+});
+
+
 /** GAME RESULTS ROUTES */
-
-
 
 // Hämta alla game results
 app.get('/game_results', async (req: Request, res: Response) => {
   try {
-    const { data, error } = await supabase.from('game_results').select('*'); // Korrekt tabellnamn
+    const { data, error } = await supabase.from('game_results').select('*');
     if (error) {
       throw new Error(error.message);
     }
@@ -72,7 +107,7 @@ app.get('/game_results', async (req: Request, res: Response) => {
   }
 });
 
-// Funktion för att lägga till ett spelresultat
+// Lägg till ett nytt spelresultat
 app.post('/game_results', async (req: Request, res: Response) => {
   const { user_id, score, game_time } = req.body;
 
@@ -90,18 +125,6 @@ app.post('/game_results', async (req: Request, res: Response) => {
     res.status(201).json({ message: 'Game result saved successfully', data });
   }
 });
-
-// Hämta alla spelresultat
-app.get('/game_results', async (req: Request, res: Response) => {
-  const { data, error } = await supabase.from('game_results').select('*');
-
-  if (error) {
-    res.status(500).json({ error: error.message });
-  } else {
-    res.json(data);
-  }
-});
-
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
