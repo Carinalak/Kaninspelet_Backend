@@ -21,13 +21,13 @@ const supabase = createClient(
 );
 
 app.use(express.json());
-app.use(cors());
-/*
+//app.use(cors());
+
 app.use(cors({
   origin: 'https://kaninspelet.onrender.com',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-}));*/
+}));
 
 /** USERS ROUTES */
 
