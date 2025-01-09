@@ -1,8 +1,9 @@
 import express, { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import cors from 'cors';
+//import cors from 'cors';
 import bcrypt from 'bcrypt';
+const cors = require("cors");
 
 dotenv.config();
 
