@@ -1,9 +1,8 @@
 import express, { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-//import cors from 'cors';
+import cors from 'cors';
 import bcrypt from 'bcrypt';
-const cors = require("cors");
 
 dotenv.config();
 
@@ -22,11 +21,13 @@ const supabase = createClient(
 );
 
 app.use(express.json());
+app.use(cors());
+/*
 app.use(cors({
-  origin: 'http://kaninspelet.onrender.com', 
+  origin: 'https://kaninspelet.onrender.com',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+}));*/
 
 /** USERS ROUTES */
 
