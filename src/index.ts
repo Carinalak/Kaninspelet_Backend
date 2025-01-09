@@ -21,7 +21,11 @@ const supabase = createClient(
 );
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'https://kaninspelet.onrender.com', 
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 /** USERS ROUTES */
 
@@ -56,7 +60,6 @@ app.post('/users/register', async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Kunde inte registrera användaren.' });
   }
 });
-
 
 
 // Logga in användare
