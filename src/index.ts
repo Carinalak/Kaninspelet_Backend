@@ -24,7 +24,7 @@ app.use(express.json());
 //app.use(cors());
 
 app.use(cors({
-  origin: 'https://kaninspelet.onrender.com',
+  origin: ['https://kaninspelet.onrender.com', 'http://localhost:3000'], 
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
