@@ -77,6 +77,7 @@ app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
       .single();
 
     if (error || !data) {
+      console.error("Användaren hittades inte eller annat fel:", error);
       res.status(401).json({ error: 'Fel användarnamn eller lösenord.' });
       return; // Avsluta funktionen
     }
@@ -85,6 +86,7 @@ app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
     const isPasswordValid = await bcrypt.compare(password, data.password);
 
     if (!isPasswordValid) {
+      console.error("Lösenordet stämmer inte.");
       res.status(401).json({ error: 'Fel användarnamn eller lösenord.' });
       return;
     }
@@ -92,6 +94,7 @@ app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
     // Inloggning lyckades
     res.status(200).json({ message: 'Inloggning lyckades', user: { id: data.user_id, name: data.name } });
   } catch (err) {
+    console.error("Oväntat serverfel:", err);
     res.status(500).json({ error: 'Serverfel vid inloggning.' });
   }
 });
