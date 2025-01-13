@@ -23,11 +23,15 @@ const supabase = createClient(
 app.use(express.json());
 //app.use(cors());
 
-app.use(cors({
-  origin: ['https://kaninspelet.onrender.com', 'http://localhost:3000'], 
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+app.use(
+  cors({
+    origin: ['https://kaninspelet.onrender.com', 'http://localhost:5173'],  // Lägg till alla domäner du vill tillåta
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],  // Lägg till OPTIONS här
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    preflightContinue: false,  // Hantera preflight-förfrågningar
+    optionsSuccessStatus: 204  // Returnera korrekt statuskod för preflight-förfrågningar
+  })
+);
 
 /** USERS ROUTES */
 
