@@ -3,8 +3,8 @@ POST http://localhost:3000/users/register
 Content-Type: application/json
 
 {
-  "name": "Hajen",
-  "password": "test"
+  "name": "Nanna2",
+  "password": "test2"
 }
 
 ###

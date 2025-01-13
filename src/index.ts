@@ -90,7 +90,7 @@ app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
     }
 
     // Inloggning lyckades
-    res.status(200).json({ message: 'Inloggning lyckades', user: { id: data.id, name: data.name } });
+    res.status(200).json({ message: 'Inloggning lyckades', user: { id: data.user_id, name: data.name } });
   } catch (err) {
     res.status(500).json({ error: 'Serverfel vid inloggning.' });
   }
