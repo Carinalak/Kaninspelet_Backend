@@ -103,6 +103,27 @@ app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// Ta bort en användare
+app.delete('/user/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .delete()
+      .eq('user_id', id);
+
+    if (error) {
+      res.status(500).json({ error: error.message });
+      return;
+    }
+
+    res.status(200).json({ message: 'Användare borttagen.', data });
+  } catch (err) {
+    res.status(500).json({ error: 'Kunde inte ta bort användaren.' });
+  }
+});
+
 
 /** GAME RESULTS ROUTES */
 
