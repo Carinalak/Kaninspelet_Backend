@@ -35,6 +35,9 @@ app.use(
   })
 );
 
+app.options('*', cors());
+
+
 // Middleware för att verifiera JWT-token
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers['authorization']?.split(' ')[1];
