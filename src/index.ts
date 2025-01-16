@@ -29,6 +29,7 @@ app.use(
     origin: ['https://kaninspelet.onrender.com', 'http://localhost:5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    credentials: true,
     preflightContinue: false,
     optionsSuccessStatus: 204
   })
@@ -36,7 +37,7 @@ app.use(
 
 // Middleware för att verifiera JWT-token
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers['authorization']?.split(' ')[1]; // Hämta token från Authorization-header
+  const token = req.headers['authorization']?.split(' ')[1];
   if (!token) {
     res.status(401).json({ error: 'Ingen token tillhandahållen' });
     return;
