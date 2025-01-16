@@ -1,14 +1,15 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
 // Kontrollera att miljövariablerna är definierade
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
-  console.error('Supabase URL or Supabase Key is not defined in .env file');
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY || !process.env.JWT_SECRET) {
+  console.error('Nödvändiga miljövariabler saknas i .env-filen');
   process.exit(1);
 }
 
@@ -25,13 +26,32 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: ['https://kaninspelet.onrender.com', 'http://localhost:5173'],  // Lägg till alla domäner du vill tillåta
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],  // Lägg till OPTIONS här
+    origin: ['https://kaninspelet.onrender.com', 'http://localhost:5173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    preflightContinue: false,  // Hantera preflight-förfrågningar
-    optionsSuccessStatus: 204  // Returnera korrekt statuskod för preflight-förfrågningar
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   })
 );
+
+// Middleware för att verifiera JWT-token
+const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
+  const token = req.headers['authorization']?.split(' ')[1]; // Hämta token från Authorization-header
+  if (!token) {
+    res.status(401).json({ error: 'Ingen token tillhandahållen' });
+    return;
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET!, (err: any, user: any) => {
+    if (err) {
+      res.status(403).json({ error: 'Ogiltig token' });
+      return;
+    }
+    req.body.user = user;
+    next();
+  });
+};
+
 
 /** USERS ROUTES */
 
@@ -83,7 +103,7 @@ app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
     if (error || !data) {
       console.error("Användaren hittades inte eller annat fel:", error);
       res.status(401).json({ error: 'Fel användarnamn eller lösenord.' });
-      return; // Avsluta funktionen
+      return;
     }
 
     // Verifiera lösenordet med bcrypt
@@ -95,13 +115,26 @@ app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    
+    // Skapa JWT-token
+    const token = jwt.sign(
+      { id: data.user_id, name: data.name },
+      process.env.JWT_SECRET!
+    );
+
+    res.status(200).json({ message: 'Inloggning lyckades', token });
+  } catch (err) {
+    res.status(500).json({ error: 'Serverfel vid inloggning.' });
+  }
+});
+/*
     // Inloggning lyckades
     res.status(200).json({ message: 'Inloggning lyckades', user: { id: data.user_id, name: data.name } });
   } catch (err) {
     console.error("Oväntat serverfel:", err);
     res.status(500).json({ error: 'Serverfel vid inloggning.' });
   }
-});
+});*/
 
 // Ta bort en användare
 app.delete('/user/:id', async (req: Request, res: Response) => {
@@ -140,22 +173,24 @@ app.get('/game_results', async (req: Request, res: Response) => {
   }
 });
 
+
 // Lägg till ett nytt spelresultat
-app.post('/game_results', async (req: Request, res: Response) => {
-  const { user_id, score, game_time } = req.body;
 
-  const { data, error } = await supabase.from('game_results').insert([
-    {
-      user_id: user_id,
-      score: score,
-      game_time: game_time,
-    },
-  ]);
+app.post('/game_results', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+  const { user_id, total_score } = req.body;
 
-  if (error) {
-    res.status(500).json({ error: error.message });
-  } else {
-    res.status(201).json({ message: 'Game result saved successfully', data });
+  try {
+    const { data, error } = await supabase.from('game_results').insert([
+      { user_id, total_score }
+    ]);
+
+    if (error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(201).json({ message: 'Game result saved successfully', data });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Kunde inte spara spelets resultat.' });
   }
 });
 

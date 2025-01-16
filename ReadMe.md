@@ -12,5 +12,8 @@ To run the backend:
 - npm list express @supabase/supabase-js body-parser cors
 - npm install express @types/express
 - npm install bcrypt
+- npm install jsonwebtoken 
+- npm install @types/jsonwebtoken --save-dev - för autentisering av användare när den spelar och poäng läggs till
+
 
 
