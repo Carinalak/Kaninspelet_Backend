@@ -60,6 +60,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
 /** USERS ROUTES */
 
 // Hämta alla användare
+/*
 app.get('/users', async (req: Request, res: Response) => {
   try {
     const { data, error } = await supabase.from('users').select('*');
@@ -67,6 +68,29 @@ app.get('/users', async (req: Request, res: Response) => {
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch users from Supabase' });
+  }
+});
+
+*/
+// Hämta den inloggade användaren baserat på token
+app.get('/users', authenticateToken, async (req: Request, res: Response) => {
+  const userId = req.body.user.id; // user-informationen från token
+
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error || !data) {
+      res.status(404).json({ error: 'Användaren hittades inte.' });
+      return;
+    }
+
+    res.json(data); // Skicka tillbaka endast den användaren
+  } catch (err) {
+    res.status(500).json({ error: 'Serverfel vid hämtning av användaren.' });
   }
 });
 
@@ -164,7 +188,7 @@ app.delete('/user/:id', async (req: Request, res: Response) => {
 
 /** GAME RESULTS ROUTES */
 
-// Hämta alla game results
+// Hämta alla game results från alla användare
 app.get('/game_results', async (req: Request, res: Response) => {
   try {
     const { data, error } = await supabase.from('game_results').select('*');
@@ -179,7 +203,7 @@ app.get('/game_results', async (req: Request, res: Response) => {
 
 
 // Lägg till ett nytt spelresultat
-
+/*
 app.post('/game_results', authenticateToken, async (req: Request, res: Response): Promise<void> => {
   const { user_id, total_score } = req.body;
 
@@ -197,6 +221,54 @@ app.post('/game_results', authenticateToken, async (req: Request, res: Response)
     res.status(500).json({ error: 'Kunde inte spara spelets resultat.' });
   }
 });
+*/
+app.post('/game_results', authenticateToken, async (req: Request, res: Response): Promise<void> => {
+  const { user_id, total_score } = req.body;
+  const tokenUserId = req.body.user.id;
+
+  if (user_id !== tokenUserId) {
+    res.status(403).json({ error: 'User ID does not match token' });
+    return;
+  }
+
+  try {
+    const { data, error } = await supabase.from('game_results').insert([
+      { user_id: tokenUserId, total_score }
+    ]);
+
+    if (error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(201).json({ message: 'Game result saved successfully', data });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Could not save game result.' });
+  }
+});
+
+// Hämta alla spelresultat från specifik användare:
+app.get('/game_results/:user_id', async (req: Request, res: Response): Promise<void> => {
+  const { user_id } = req.params;
+
+  try {
+    const { data, error } = await supabase
+      .from('game_results')
+      .select('*')
+      .eq('user_id', user_id);
+
+    if (error) {
+      res.status(500).json({ error: error.message });
+    } else if (!data || data.length === 0) {
+      res.status(404).json({ message: 'Inga spelresultat hittades för användaren.' });
+    } else {
+      res.status(200).json({ results: data });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Kunde inte hämta spelresultat.' });
+  }
+});
+
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
