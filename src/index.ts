@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ const supabase = createClient(
 
 app.use(express.json());
 //app.use(cors());
+app.use(cookieParser());
 
 app.use(
   cors({
@@ -117,6 +119,57 @@ app.post('/users/register', async (req: Request, res: Response) => {
 
 
 // Logga in användare
+const SECRET_KEY = process.env.JWT_SECRET || 'fallback_secret_key';
+
+app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
+  const { name, password } = req.body;
+
+  try {
+    // Hämta användaren från databasen baserat på namnet
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('name', name)
+      .single();
+
+    if (error || !data) {
+      console.error("Användaren hittades inte eller annat fel:", error);
+      res.status(401).json({ error: 'Fel användarnamn eller lösenord.' });
+      return;
+    }
+
+    // Verifiera lösenordet med bcrypt
+    const isPasswordValid = await bcrypt.compare(password, data.password);
+
+    if (!isPasswordValid) {
+      console.error("Lösenordet stämmer inte.");
+      res.status(401).json({ error: 'Fel användarnamn eller lösenord.' });
+      return;
+    }
+
+    // Skapa JWT-token
+    const token = jwt.sign(
+      { id: data.user_id, name: data.name },
+      SECRET_KEY,
+      { expiresIn: '7d' } // Token gäller i 7 dagar
+    );
+
+    // Skicka token och användarinfo tillbaka till klienten
+    res.status(200).json({
+      message: 'Inloggning lyckades',
+      token,
+      user: {
+        id: data.user_id,
+        name: data.name,
+      },
+    });
+  } catch (err) {
+    console.error('Serverfel:', err);
+    res.status(500).json({ error: 'Serverfel vid inloggning.' });
+  }
+});
+
+/*
 app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
   const { name, password } = req.body;
 
@@ -155,6 +208,10 @@ app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: 'Serverfel vid inloggning.' });
   }
 });
+
+*/
+
+
 /*
     // Inloggning lyckades
     res.status(200).json({ message: 'Inloggning lyckades', user: { id: data.user_id, name: data.name } });

@@ -14,6 +14,9 @@ To run the backend:
 - npm install bcrypt
 - npm install jsonwebtoken 
 - npm install @types/jsonwebtoken --save-dev - för autentisering av användare när den spelar och poäng läggs till
+- npm install cookie-parser
+- npm install --save-dev @types/cookie-parser
+
 
 
 

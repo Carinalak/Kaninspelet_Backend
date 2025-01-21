@@ -3,7 +3,7 @@ POST http://localhost:3000/users/register
 Content-Type: application/json
 
 {
-  "name": "Johanna",
+  "name": "Noah",
   "password": "test"
 }
 
@@ -14,7 +14,7 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-"name": "Bobo",
+"name": "Noah",
 "password": "test"
 }
 
@@ -22,7 +22,7 @@ Content-Type: application/json
 
 # @name getUser
 GET http://localhost:3000/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsIm5hbWUiOiJCb2JvIiwiaWF0IjoxNzM3MzU3MTM5fQ.iKEwqDufagY3PDfDpMMvbjJD6MzWk1xUtfw_Nyc3DTU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDgsIm5hbWUiOiJOb2FoIiwiaWF0IjoxNzM3NDQ0OTg2LCJleHAiOjE3MzgwNDk3ODZ9.DEo4u1n32n3ZL8azQF-UeCVQOinFrcYCfDoBRqOlzKw
 
 ###
 
@@ -32,18 +32,18 @@ DELETE http://localhost:3000/user/17
 
 # @name postGame_results
 POST http://localhost:3000/game_results/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsIm5hbWUiOiJCb2JvIiwiaWF0IjoxNzM3MzU3MTM5fQ.iKEwqDufagY3PDfDpMMvbjJD6MzWk1xUtfw_Nyc3DTU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDgsIm5hbWUiOiJOb2FoIiwiaWF0IjoxNzM3NDQ0OTg2LCJleHAiOjE3MzgwNDk3ODZ9.DEo4u1n32n3ZL8azQF-UeCVQOinFrcYCfDoBRqOlzKw
 Content-Type: application/json
 
 {
-  "user_id": 12,
+  "user_id": 48,
   "total_score": 20
 }
 
 ###
 
 # @name getgame_results
-GET http://localhost:3000/game_results/5
+GET http://localhost:3000/game_results/3
 Content-Type: application/json
 
 ###
