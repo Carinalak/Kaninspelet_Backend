@@ -280,7 +280,7 @@ app.post('/game_results', authenticateToken, async (req: Request, res: Response)
 });
 */
 app.post('/game_results', authenticateToken, async (req: Request, res: Response): Promise<void> => {
-  const { user_id, total_score } = req.body;
+  const { user_id, total_score, game_date } = req.body;
   const tokenUserId = req.body.user.id;
 
   if (user_id !== tokenUserId) {
@@ -290,7 +290,7 @@ app.post('/game_results', authenticateToken, async (req: Request, res: Response)
 
   try {
     const { data, error } = await supabase.from('game_results').insert([
-      { user_id: tokenUserId, total_score }
+      { user_id: tokenUserId, total_score, game_date }
     ]);
 
     if (error) {

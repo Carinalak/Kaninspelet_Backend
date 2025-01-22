@@ -37,13 +37,13 @@ Content-Type: application/json
 
 {
   "user_id": 48,
-  "total_score": 20
+  "total_score": 21
 }
 
 ###
 
 # @name getgame_results
-GET http://localhost:3000/game_results/3
+GET http://localhost:3000/game_results/48
 Content-Type: application/json
 
 ###
