@@ -37,7 +37,8 @@ Content-Type: application/json
 
 {
   "user_id": 42,
-  "total_score": 32
+  "total_score": 32,
+  "golden_rabbits": 2
 }
 
 ###

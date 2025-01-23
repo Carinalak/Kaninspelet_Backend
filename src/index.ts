@@ -208,7 +208,7 @@ app.get('/game_results', async (req: Request, res: Response) => {
 
 // Lägg till ett nytt spelresultat
 app.post('/game_results', authenticateToken, async (req: Request, res: Response): Promise<void> => {
-  const { user_id, total_score, game_date } = req.body;
+  const { user_id, total_score, game_date, golden_rabbits } = req.body;
   const tokenUserId = req.body.user.id;
 
   if (user_id !== tokenUserId) {
@@ -221,7 +221,7 @@ app.post('/game_results', authenticateToken, async (req: Request, res: Response)
 
   try {
     const { data, error } = await supabase.from('game_results').insert([
-      { user_id: tokenUserId, total_score, game_date: gameDateToInsert }
+      { user_id: tokenUserId, total_score, game_date: gameDateToInsert, golden_rabbits }
     ]);
 
     if (error) {
