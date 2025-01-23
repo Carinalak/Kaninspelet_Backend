@@ -208,7 +208,7 @@ app.get('/game_results', async (req: Request, res: Response) => {
 
 // Lägg till ett nytt spelresultat
 app.post('/game_results', authenticateToken, async (req: Request, res: Response): Promise<void> => {
-  const { user_id, total_score, game_date } = req.body;
+  const { user_id, total_score } = req.body;
   const tokenUserId = req.body.user.id;
 
   if (user_id !== tokenUserId) {
