@@ -117,7 +117,6 @@ app.post('/users/register', async (req: Request, res: Response) => {
   }
 });
 
-
 // Logga in användare
 const SECRET_KEY = process.env.JWT_SECRET || 'fallback_secret_key';
 
@@ -169,58 +168,6 @@ app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-/*
-app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
-  const { name, password } = req.body;
-
-  try {
-    // Hämta användaren från databasen baserat på namnet
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('name', name)
-      .single();
-
-    if (error || !data) {
-      console.error("Användaren hittades inte eller annat fel:", error);
-      res.status(401).json({ error: 'Fel användarnamn eller lösenord.' });
-      return;
-    }
-
-    // Verifiera lösenordet med bcrypt
-    const isPasswordValid = await bcrypt.compare(password, data.password);
-
-    if (!isPasswordValid) {
-      console.error("Lösenordet stämmer inte.");
-      res.status(401).json({ error: 'Fel användarnamn eller lösenord.' });
-      return;
-    }
-
-    
-    // Skapa JWT-token
-    const token = jwt.sign(
-      { id: data.user_id, name: data.name },
-      process.env.JWT_SECRET!
-    );
-
-    res.status(200).json({ message: 'Inloggning lyckades', token });
-  } catch (err) {
-    res.status(500).json({ error: 'Serverfel vid inloggning.' });
-  }
-});
-
-*/
-
-
-/*
-    // Inloggning lyckades
-    res.status(200).json({ message: 'Inloggning lyckades', user: { id: data.user_id, name: data.name } });
-  } catch (err) {
-    console.error("Oväntat serverfel:", err);
-    res.status(500).json({ error: 'Serverfel vid inloggning.' });
-  }
-});*/
-
 // Ta bort en användare
 app.delete('/user/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -260,25 +207,6 @@ app.get('/game_results', async (req: Request, res: Response) => {
 
 
 // Lägg till ett nytt spelresultat
-/*
-app.post('/game_results', authenticateToken, async (req: Request, res: Response): Promise<void> => {
-  const { user_id, total_score } = req.body;
-
-  try {
-    const { data, error } = await supabase.from('game_results').insert([
-      { user_id, total_score }
-    ]);
-
-    if (error) {
-      res.status(500).json({ error: error.message });
-    } else {
-      res.status(201).json({ message: 'Game result saved successfully', data });
-    }
-  } catch (err) {
-    res.status(500).json({ error: 'Kunde inte spara spelets resultat.' });
-  }
-});
-*/
 app.post('/game_results', authenticateToken, async (req: Request, res: Response): Promise<void> => {
   const { user_id, total_score, game_date } = req.body;
   const tokenUserId = req.body.user.id;
@@ -290,7 +218,7 @@ app.post('/game_results', authenticateToken, async (req: Request, res: Response)
 
   try {
     const { data, error } = await supabase.from('game_results').insert([
-      { user_id: tokenUserId, total_score, game_date }
+      { user_id: tokenUserId, total_score }
     ]);
 
     if (error) {
