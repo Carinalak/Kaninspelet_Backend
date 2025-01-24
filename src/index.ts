@@ -23,7 +23,6 @@ const supabase = createClient(
 );
 
 app.use(express.json());
-//app.use(cors());
 app.use(cookieParser());
 
 app.use(
@@ -33,12 +32,11 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true,
     preflightContinue: false,
-    optionsSuccessStatus: 204
+    optionsSuccessStatus: 204,
   })
 );
 
 app.options('*', cors());
-
 
 // Middleware för att verifiera JWT-token
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
@@ -48,35 +46,21 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
     return;
   }
 
-  jwt.verify(token, process.env.JWT_SECRET!, (err: any, user: any) => {
+  jwt.verify(token, process.env.JWT_SECRET!, (err: any, decoded: any) => {
     if (err) {
       res.status(403).json({ error: 'Ogiltig token' });
       return;
     }
-    req.body.user = user;
+    req.body.user = decoded; // Detta inkluderar `user_id` från token-payload
     next();
   });
 };
 
-
 /** USERS ROUTES */
 
-// Hämta alla användare
-/*
-app.get('/users', async (req: Request, res: Response) => {
-  try {
-    const { data, error } = await supabase.from('users').select('*');
-    if (error) throw new Error(error.message);
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch users from Supabase' });
-  }
-});
-
-*/
 // Hämta den inloggade användaren baserat på token
 app.get('/users', authenticateToken, async (req: Request, res: Response) => {
-  const userId = req.body.user.id; // user-informationen från token
+  const userId = req.body.user.id;
 
   try {
     const { data, error } = await supabase
@@ -90,7 +74,7 @@ app.get('/users', authenticateToken, async (req: Request, res: Response) => {
       return;
     }
 
-    res.json(data); // Skicka tillbaka endast den användaren
+    res.json(data);
   } catch (err) {
     res.status(500).json({ error: 'Serverfel vid hämtning av användaren.' });
   }
@@ -124,7 +108,6 @@ app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
   const { name, password } = req.body;
 
   try {
-    // Hämta användaren från databasen baserat på namnet
     const { data, error } = await supabase
       .from('users')
       .select('*')
@@ -132,28 +115,23 @@ app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
       .single();
 
     if (error || !data) {
-      console.error("Användaren hittades inte eller annat fel:", error);
       res.status(401).json({ error: 'Fel användarnamn eller lösenord.' });
       return;
     }
 
-    // Verifiera lösenordet med bcrypt
     const isPasswordValid = await bcrypt.compare(password, data.password);
 
     if (!isPasswordValid) {
-      console.error("Lösenordet stämmer inte.");
       res.status(401).json({ error: 'Fel användarnamn eller lösenord.' });
       return;
     }
 
-    // Skapa JWT-token
     const token = jwt.sign(
       { id: data.user_id, name: data.name },
       SECRET_KEY,
-      { expiresIn: '7d' } // Token gäller i 7 dagar
+      { expiresIn: '7d' }
     );
 
-    // Skicka token och användarinfo tillbaka till klienten
     res.status(200).json({
       message: 'Inloggning lyckades',
       token,
@@ -163,48 +141,29 @@ app.post('/auth/login', async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (err) {
-    console.error('Serverfel:', err);
     res.status(500).json({ error: 'Serverfel vid inloggning.' });
   }
 });
 
-// Ta bort en användare
-app.delete('/user/:id', async (req: Request, res: Response) => {
-  const { id } = req.params;
-
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .delete()
-      .eq('user_id', id);
-
-    if (error) {
-      res.status(500).json({ error: error.message });
-      return;
-    }
-
-    res.status(200).json({ message: 'Användare borttagen.', data });
-  } catch (err) {
-    res.status(500).json({ error: 'Kunde inte ta bort användaren.' });
-  }
-});
-
-
 /** GAME RESULTS ROUTES */
 
-// Hämta alla game results från alla användare
+// Hämta alla spelresultat med användarnamn
 app.get('/game_results', async (req: Request, res: Response) => {
   try {
-    const { data, error } = await supabase.from('game_results').select('*');
+    const { data, error } = await supabase
+      .from('game_results')
+      .select('*, users(name)')
+      .order('total_score', { ascending: false });
+
     if (error) {
       throw new Error(error.message);
     }
+
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch game results from Supabase' });
   }
 });
-
 
 // Lägg till ett nytt spelresultat
 app.post('/game_results', authenticateToken, async (req: Request, res: Response): Promise<void> => {
@@ -216,12 +175,11 @@ app.post('/game_results', authenticateToken, async (req: Request, res: Response)
     return;
   }
 
-
   const gameDateToInsert = game_date || new Date().toISOString();
 
   try {
     const { data, error } = await supabase.from('game_results').insert([
-      { user_id: tokenUserId, total_score, game_date: gameDateToInsert, golden_rabbits }
+      { user_id: tokenUserId, total_score, game_date: gameDateToInsert, golden_rabbits },
     ]);
 
     if (error) {
@@ -233,30 +191,6 @@ app.post('/game_results', authenticateToken, async (req: Request, res: Response)
     res.status(500).json({ error: 'Could not save game result.' });
   }
 });
-
-// Hämta alla spelresultat från specifik användare:
-app.get('/game_results/:user_id', async (req: Request, res: Response): Promise<void> => {
-  const { user_id } = req.params;
-
-  try {
-    const { data, error } = await supabase
-      .from('game_results')
-      .select('*')
-      .eq('user_id', user_id);
-
-    if (error) {
-      res.status(500).json({ error: error.message });
-    } else if (!data || data.length === 0) {
-      res.status(404).json({ message: 'Inga spelresultat hittades för användaren.' });
-    } else {
-      res.status(200).json({ results: data });
-    }
-  } catch (err) {
-    res.status(500).json({ error: 'Kunde inte hämta spelresultat.' });
-  }
-});
-
-
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
