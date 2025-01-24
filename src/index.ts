@@ -192,6 +192,31 @@ app.post('/game_results', authenticateToken, async (req: Request, res: Response)
   }
 });
 
+
+// Hämta alla spelresultat från specifik användare:
+app.get('/game_results/:user_id', async (req: Request, res: Response): Promise<void> => {
+  const { user_id } = req.params;
+
+  try {
+    const { data, error } = await supabase
+      .from('game_results')
+      .select('*')
+      .eq('user_id', user_id);
+
+    if (error) {
+      res.status(500).json({ error: error.message });
+    } else if (!data || data.length === 0) {
+      res.status(404).json({ message: 'Inga spelresultat hittades för användaren.' });
+    } else {
+      res.status(200).json({ results: data });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Kunde inte hämta spelresultat.' });
+  }
+});
+
+
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

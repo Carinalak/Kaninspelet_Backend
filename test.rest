@@ -37,9 +37,18 @@ Content-Type: application/json
 
 {
   "user_id": 69,
-  "total_score": 44,
-  "golden_rabbits": 5
+  "total_score": 29,
+  "golden_rabbits": 3
 }
+
+###
+
+# @name getgame_resultsFromOneUser
+GET http://localhost:3000/game_results/69
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjksIm5hbWUiOiJMb2xsbyIsImlhdCI6MTczNzcxMTc4NSwiZXhwIjoxNzM4MzE2NTg1fQ.XLokVXkOwciiBbNYfTo4a7lS2bFqKGJ3iOQTPD8jBwQ
+Content-Type: application/json
+
+###
 
 ###
 
