@@ -81,7 +81,7 @@ app.get('/users', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // Skapa användare
-app.post('/users/register', async (req: Request, res: Response): Promise<Response> => {
+app.post('/users/register', async (req: Request, res: Response) => {
   const { name, password } = req.body;
 
   try {
@@ -107,10 +107,9 @@ app.post('/users/register', async (req: Request, res: Response): Promise<Respons
       return res.status(500).json({ error: error.message });
     }
 
-    return res.status(201).json({ message: 'Användare registrerad!', data });
+    res.status(201).json({ message: 'Användare registrerad!', data });
   } catch (err) {
-    console.error('Registreringsfel:', err); // För felsökning
-    return res.status(500).json({ error: 'Kunde inte registrera användaren.' });
+    res.status(500).json({ error: 'Kunde inte registrera användaren.' });
   }
 });
 
