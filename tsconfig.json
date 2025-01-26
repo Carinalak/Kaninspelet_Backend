@@ -8,7 +8,10 @@
     "forceConsistentCasingInFileNames": true,            /* Tvinga konsekvent filnamnsstorlek i importerna. */
     "strict": true,                                      /* Aktivera striktare typkontroller. */
     "skipLibCheck": true,                                 /* Hoppa över typkontroll för .d.ts-filer. */
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "typeRoots": [
+      "node_modules/@types"                               /* Lägg till denna rad för att säkerställa att typer från @types används. */
+    ]  
   },
   "include": ["src/**/*"],                               /* Inkludera alla TypeScript-filer i src/ för kompilering. */
   "exclude": ["node_modules"]                            /* Exkludera node_modules från kompileringen. */

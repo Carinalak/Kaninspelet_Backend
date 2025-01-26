@@ -81,23 +81,36 @@ app.get('/users', authenticateToken, async (req: Request, res: Response) => {
 });
 
 // Skapa användare
-app.post('/users/register', async (req: Request, res: Response) => {
+app.post('/users/register', async (req: Request, res: Response): Promise<Response> => {
   const { name, password } = req.body;
 
   try {
+    // Kontrollera om användarnamnet redan finns
+    const { data: existingUser, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('name', name)
+      .single();
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'Namnet är redan upptaget. Välj ett annat namn.' });
+    }
+
+    // Hasha lösenordet
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const { data, error } = await supabase.from('users').insert([
       { name, password: hashedPassword },
     ]);
 
     if (error) {
-      res.status(500).json({ error: error.message });
-      return;
+      return res.status(500).json({ error: error.message });
     }
 
-    res.status(201).json({ message: 'Användare registrerad!', data });
+    return res.status(201).json({ message: 'Användare registrerad!', data });
   } catch (err) {
-    res.status(500).json({ error: 'Kunde inte registrera användaren.' });
+    console.error('Registreringsfel:', err); // För felsökning
+    return res.status(500).json({ error: 'Kunde inte registrera användaren.' });
   }
 });
 
