@@ -1,11 +1,14 @@
-# RabbitGame Backend
+# Kaninspelet Backend
 
 To run the backend:
 - backend: npm run dev
 
 ------------------------------------------
 - Backend is deployed on Railway.com
--The database is on Supabase.com-
+- The database is on Supabase.com
+- Frontend to this is on: https://github.com/Carinalak/Kaninspelet.git
+- The site is liva at: https://kaninspelet.onrender.com/
+
 
 # Installationer:
 
