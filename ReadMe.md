@@ -10,7 +10,7 @@ To run the backend:
 - The site is liva at: https://kaninspelet.onrender.com/
 
 
-# Installationer:
+# Installations:
 
 - npm list express @supabase/supabase-js body-parser cors
 - npm install express @types/express
