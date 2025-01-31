@@ -7,7 +7,7 @@ To run the backend:
 - Backend is deployed on Railway.com
 - The database is on Supabase.com
 - Frontend to this is on: https://github.com/Carinalak/Kaninspelet.git
-- The site is liva at: https://kaninspelet.onrender.com/
+- The site is live at: https://kaninspelet.onrender.com/
 
 
 # Installations:

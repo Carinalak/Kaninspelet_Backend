@@ -227,8 +227,6 @@ app.get('/game_results/:user_id', async (req: Request, res: Response): Promise<v
   }
 });
 
-
-
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
