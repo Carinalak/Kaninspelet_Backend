@@ -84,8 +84,15 @@ app.get('/users', authenticateToken, async (req: Request, res: Response) => {
 app.post('/users/register', async (req: Request, res: Response) => {
   const { name, password } = req.body;
 
+  // Lösenordsvalidering (minst 8 tecken, en stor bokstav, en liten bokstav och en siffra)
+  const passwordValidationRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
+
+
+  if (!passwordValidationRegex.test(password)) {
+    return res.status(400).json({ error: "Lösenordet måste vara minst 8 tecken, innehålla minst en stor och en liten bokstav, en siffra och ett specialtecken." });
+  }
+
   try {
-    // Kontrollera om användarnamnet redan finns
     const { data: existingUser, error: userError } = await supabase
       .from('users')
       .select('*')
@@ -112,6 +119,7 @@ app.post('/users/register', async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Kunde inte registrera användaren.' });
   }
 });
+
 
 // Logga in användare
 const SECRET_KEY = process.env.JWT_SECRET || 'fallback_secret_key';
