@@ -83,8 +83,6 @@ app.get('/users', authenticateToken, async (req: Request, res: Response) => {
 // Skapa användare
 app.post('/users/register', async (req: Request, res: Response) => {
   const { name, password } = req.body;
-
-  // Lösenordsvalidering (minst 8 tecken, en stor bokstav, en liten bokstav och en siffra)
   const passwordValidationRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
 
 
